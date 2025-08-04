@@ -1,43 +1,40 @@
-// Usturoi Flavius-Gabriel, 336CC
-// Tema 3 - Calcule colaborative in sisteme distribuite
+// Distributed systems in cluster topology
 
 
-	Ideea generala a codului meu in vederea rezolvarii temei
-a fost utilizarea functionalitatilor puse la dispozitie de MPI
-astfel incat toate procesele sa cunoasca topologia sistemului,
-iar procesele coordonator sa fie capabile sa distribuie vectorul
-in clusterele acestora.
+	The general idea of my code to solve the task was to
+use the functionalities provided by MPI so that all processes
+know the topology of the system, and the coordinator processes
+are able to distribute the vector into their clusters.
 
 			REZOLVAREA TASKURILOR
 
-	Initial, fiecare proces coordonator isi deschide propriul
-fisier de intrare in functie de rangul sau, astfel incat sa isi
-cunoasca procesele worker din cluster si sa isi construiasca o
-parte din topologie. Aceasta este reprezentata ca o matrice de
-NxM, unde N este numarul de coordonatori (in cadrul temei, va fi
-mereu 4), iar M este numarul total de procese ale sistemului distri-
-buit. Urmatorul pas este trimiterea unui mesaj catre workeri astfel
-incat acestia sa stie cine este liderul lor.
-	Mai departe, incepe practic procesul de stabilire a topologiei.
-Coordonatorul 0 trimite catre procesul 1 (sau 3 in cazul erorii de comu-
-nicatie) lista de workeri din clusterul sau. Procesul 1 (sau 3) isi
-suprascrie linia corespunzatoare procesului 0 din matricea de topologie
-cu ce tocmai a primit si va transmite urmatorului nod lista de workeri
-extinsa cu ce informatii detinea pana in acel moment. Mecanismul se reia
-pana cand matricea de topologie completa ajunge inapoi la nodul 0. Coordo-
-natorul 0 o mai distribuie inca o data astfel incat toate procesele sis-
-temului (inclusiv workerii) sa o detina. Fiecare afiseaza topologia pe ecran.
-	Realizarea calculelor se desfasoara in urmatorul mod: procesul 0
-genereaza vectorul, il distribuie workerilor din clusterul sau, primeste
-inapoi bucata modificata de care s-a ocupat fiecare worker si o suprascrie
-peste ce detinea el pana acum. Apoi, transmite vectorul modificat partial
-catre urmatorul coordonator, iar acesta procedeaza identic cu procesul 0.
-Algoritmul continua pana cand vectorul final ajunge de unde a plecat initial,
-iar nodul 0 il va afisa pe ecran.
-	In cazul erorii de comunicatie dintre procesul 0 si 1, stabilirea
-topologiei si realizarea calculelor decurge similar, doar ca informatia tra-
-verseaza inelul "defect" in sens trigonometric si nu in sensul acelor de
-ceasornic ca in cazul primei parti a temei.
-	Fiecare operatie de MPI_Send este urmata de un log in stdout cu
-sursa si destinatia mesajului astfel incat sa nu existe comunicatie intre
-nodurile neconectate direct.
+	Initially, each coordinator process opens its own input file
+according to its rank, so that it can learn about its worker processes
+in the cluster and build part of its topology. This is represented as an
+NxM matrix, where N is the number of coordinators (in the context of the
+project, it will always be 4), and M is the total number of processes in
+the distributed system. The next step is to send a message to the workers
+so that they know who their leader is.
+	Next, the topology establishment process practically begins.
+Coordinator 0 sends process 1 (or 3 in case of communication error) the list
+of workers in its cluster. Process 1 (or 3) overwrites the line corresponding
+to process 0 in the topology matrix with what it has just received and will
+transmit to the next node the expanded list of workers with the information
+it had up to that moment. The mechanism continues until the complete topology
+matrix reaches node 0. Coordinator 0 distributes it once more so that all 
+processes in the system (including workers) have it. Each one displays the
+topology on the screen.
+	The calculations are carried out in the following way: process 0
+generates the vector, distributes it to the workers in its cluster, receives
+back the modified piece that each worker has handled and overwrites
+it over what it had until now. Then, it transmits the partially modified vector
+to the next coordinator, and this one proceeds identically to process 0.
+The algorithm continues until the final vector reaches where it initially started,
+and node 0 will display it on the screen.
+	In the case of a communication error between process 0 and 1, establishing
+the topology and performing the calculations proceeds similarly, except that the
+information traverses the "defective" ring in a trigonometric sense and not in a
+clockwise direction as in the first part of the project.
+	Each MPI_Send operation is followed by a log in stdout with the source and
+destination of the message so that there is no communication between nodes not directly
+connected.
