@@ -1,0 +1,43 @@
+// Usturoi Flavius-Gabriel, 336CC
+// Tema 3 - Calcule colaborative in sisteme distribuite
+
+
+	Ideea generala a codului meu in vederea rezolvarii temei
+a fost utilizarea functionalitatilor puse la dispozitie de MPI
+astfel incat toate procesele sa cunoasca topologia sistemului,
+iar procesele coordonator sa fie capabile sa distribuie vectorul
+in clusterele acestora.
+
+			REZOLVAREA TASKURILOR
+
+	Initial, fiecare proces coordonator isi deschide propriul
+fisier de intrare in functie de rangul sau, astfel incat sa isi
+cunoasca procesele worker din cluster si sa isi construiasca o
+parte din topologie. Aceasta este reprezentata ca o matrice de
+NxM, unde N este numarul de coordonatori (in cadrul temei, va fi
+mereu 4), iar M este numarul total de procese ale sistemului distri-
+buit. Urmatorul pas este trimiterea unui mesaj catre workeri astfel
+incat acestia sa stie cine este liderul lor.
+	Mai departe, incepe practic procesul de stabilire a topologiei.
+Coordonatorul 0 trimite catre procesul 1 (sau 3 in cazul erorii de comu-
+nicatie) lista de workeri din clusterul sau. Procesul 1 (sau 3) isi
+suprascrie linia corespunzatoare procesului 0 din matricea de topologie
+cu ce tocmai a primit si va transmite urmatorului nod lista de workeri
+extinsa cu ce informatii detinea pana in acel moment. Mecanismul se reia
+pana cand matricea de topologie completa ajunge inapoi la nodul 0. Coordo-
+natorul 0 o mai distribuie inca o data astfel incat toate procesele sis-
+temului (inclusiv workerii) sa o detina. Fiecare afiseaza topologia pe ecran.
+	Realizarea calculelor se desfasoara in urmatorul mod: procesul 0
+genereaza vectorul, il distribuie workerilor din clusterul sau, primeste
+inapoi bucata modificata de care s-a ocupat fiecare worker si o suprascrie
+peste ce detinea el pana acum. Apoi, transmite vectorul modificat partial
+catre urmatorul coordonator, iar acesta procedeaza identic cu procesul 0.
+Algoritmul continua pana cand vectorul final ajunge de unde a plecat initial,
+iar nodul 0 il va afisa pe ecran.
+	In cazul erorii de comunicatie dintre procesul 0 si 1, stabilirea
+topologiei si realizarea calculelor decurge similar, doar ca informatia tra-
+verseaza inelul "defect" in sens trigonometric si nu in sensul acelor de
+ceasornic ca in cazul primei parti a temei.
+	Fiecare operatie de MPI_Send este urmata de un log in stdout cu
+sursa si destinatia mesajului astfel incat sa nu existe comunicatie intre
+nodurile neconectate direct.
